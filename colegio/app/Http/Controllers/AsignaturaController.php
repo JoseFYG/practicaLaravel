@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Asignatura;
+use App\Models\{Asignatura, Profesor};
 use Illuminate\Http\Request;
 
 class AsignaturaController extends Controller
@@ -14,7 +14,8 @@ class AsignaturaController extends Controller
      */
     public function index()
     {
-        //
+        $asignaturas=Asignatura::orderBy('nombre')->orderBy('creditos')->paginate(3);
+        return view('asignaturas.index', compact('asignaturas'));
     }
 
     /**
@@ -24,7 +25,9 @@ class AsignaturaController extends Controller
      */
     public function create()
     {
-        //
+        $misProfesores=Profesor::getArrayIdNombre();
+        //dd($misTiendas);
+        return view('asignaturas.create', compact('misProfesores'));
     }
 
     /**
@@ -35,7 +38,18 @@ class AsignaturaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre'=>['required', 'string', 'min:3', 'max:30', 'unique:asignaturas,nombre'],
+            'descripcion'=>['required', 'string', 'min:10', 'max:120'],
+            'creditos'=>['required', 'string', 'min:1', 'max:2'],
+            'profesor_id'=>['required'] 
+        ]);
+        try{
+            Asignatura::create($request->all());
+        }catch(\Exception $ex){
+            return redirect()->route('asignaturas.index')->with('mensaje', 'Error: '.$ex->getMessage().' BD');
+        }
+        return redirect()->route('asignaturas.index')->with('mensaje', 'Asignatura Creada');
     }
 
     /**
@@ -46,7 +60,7 @@ class AsignaturaController extends Controller
      */
     public function show(Asignatura $asignatura)
     {
-        //
+        return view('asignaturas.show', compact('asignatura'));
     }
 
     /**
@@ -57,7 +71,8 @@ class AsignaturaController extends Controller
      */
     public function edit(Asignatura $asignatura)
     {
-        //
+        $misProfesores=Profesor::getArrayIdNombre();
+        return view('asignaturas.edit', compact('asignatura', 'misProfesores'));
     }
 
     /**
@@ -69,7 +84,18 @@ class AsignaturaController extends Controller
      */
     public function update(Request $request, Asignatura $asignatura)
     {
-        //
+        $request->validate([
+            'nombre'=>['required', 'string', 'min:3', 'max:30', 'unique:asignaturas,nombre,'.$asignatura->id],
+            'descripcion'=>['required', 'string', 'min:10', 'max:120'],
+            'creditos'=>['required', 'string', 'min:1', 'max:2'],
+            'profesor_id'=>['required'] 
+        ]);
+        try{
+            $asignatura->update($request->all());
+        }catch(\Exception $ex){
+            return redirect()->route('asignaturas.index')->with('mensaje', 'Error: '.$ex->getMessage().' BD');
+        }
+        return redirect()->route('asignaturas.index')->with('mensaje', 'Asignatura Actualizada');
     }
 
     /**
@@ -80,6 +106,11 @@ class AsignaturaController extends Controller
      */
     public function destroy(Asignatura $asignatura)
     {
-        //
+        try{
+            $asignatura->delete();
+        }catch(\Exception $ex){
+            return redirect()->route('asignaturas.index')->with('mensaje', 'Error: '.$ex->getMessage().' BD');
+        }
+        return redirect()->route('asignaturas.index')->with('mensaje', 'Asignatura Borrada');
     }
 }

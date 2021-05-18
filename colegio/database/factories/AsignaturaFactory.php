@@ -27,7 +27,7 @@ class AsignaturaFactory extends Factory
             'nombre'=>$this->faker->unique()->firstName(),
             'descripcion'=>$this->faker->text($maxNbChars = 200),
             'creditos'=>$this->faker->randomDigit(),
-            'id_profesor'=>$profesores->get(rand(0, count($profesores)-1))
+            'profesor_id'=>$profesores->get(rand(0, count($profesores)-1))
         ];
     }
 }

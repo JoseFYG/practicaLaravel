@@ -14,7 +14,8 @@ class ProfesorController extends Controller
      */
     public function index()
     {
-        //
+        $profesores=Profesor::orderBy('apellidos')->orderBy('nombre')->paginate(3);
+        return view('profesores.index', compact('profesores'));
     }
 
     /**
@@ -24,7 +25,7 @@ class ProfesorController extends Controller
      */
     public function create()
     {
-        //
+        return view('profesores.create');
     }
 
     /**
@@ -35,7 +36,19 @@ class ProfesorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre'=>['required', 'string', 'min:3', 'max:30'],
+            'apellidos'=>['required', 'string', 'min:4', 'max:40'],
+            'localidad'=>['required', 'string', 'min:3', 'max:90'],
+            'email'=>['required', 'string', 'min:5', 'max:90', 'unique:profesors,email'],
+            'localidad'=>['required', 'string', 'min:4', 'max:120']
+        ]);
+        try{
+            Profesor::create($request->all());
+        }catch(\Exception $ex){
+            return redirect()->route('profesores.index')->with('mensaje', 'Error: '.$ex->getMessage().' BD');
+        }
+        return redirect()->route('profesores.index')->with('mensaje', 'Profesor Creado');
     }
 
     /**
@@ -44,9 +57,9 @@ class ProfesorController extends Controller
      * @param  \App\Models\Profesor  $profesor
      * @return \Illuminate\Http\Response
      */
-    public function show(Profesor $profesor)
+    public function show(Profesor $profesore)
     {
-        //
+        return view('profesores.show', compact('profesore'));
     }
 
     /**
@@ -55,9 +68,9 @@ class ProfesorController extends Controller
      * @param  \App\Models\Profesor  $profesor
      * @return \Illuminate\Http\Response
      */
-    public function edit(Profesor $profesor)
+    public function edit(Profesor $profesore)
     {
-        //
+        return view('profesores.edit', compact('profesore'));
     }
 
     /**
@@ -67,9 +80,21 @@ class ProfesorController extends Controller
      * @param  \App\Models\Profesor  $profesor
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Profesor $profesor)
+    public function update(Request $request, Profesor $profesore)
     {
-        //
+        $request->validate([
+            'nombre'=>['required', 'string', 'min:3', 'max:30'],
+            'apellidos'=>['required', 'string', 'min:4', 'max:40'],
+            'localidad'=>['required', 'string', 'min:3', 'max:90'],
+            'email'=>['required', 'string', 'min:5', 'max:90', 'unique:profesors,email,'.$profesore->id],
+            'localidad'=>['required', 'string', 'min:4', 'max:120']
+        ]);
+        try{
+            $profesore->update($request->all());
+        }catch(\Exception $ex){
+            return redirect()->route('profesores.index')->with('mensaje', 'Error: '.$ex->getMessage().' BD');
+        }
+        return redirect()->route('profesores.index')->with('mensaje', 'Profesor Actualizado');
     }
 
     /**
@@ -78,8 +103,13 @@ class ProfesorController extends Controller
      * @param  \App\Models\Profesor  $profesor
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Profesor $profesor)
+    public function destroy(Profesor $profesore)
     {
-        //
+        try{
+            $profesore->delete();
+        }catch(\Exception $ex){
+            return redirect()->route('profesores.index')->with('mensaje', 'Error: '.$ex->getMessage().' BD');
+        }
+        return redirect()->route('profesores.index')->with('mensaje', 'Profesor Borrado');
     }
 }
